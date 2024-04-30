@@ -6,7 +6,7 @@
 /*   By: aalhalab <aalhalab@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/29 15:41:57 by aalhalab          #+#    #+#             */
-/*   Updated: 2024/04/29 17:51:41 by aalhalab         ###   ########.fr       */
+/*   Updated: 2024/04/30 02:36:08 by aalhalab         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,79 +30,78 @@ Node *create_stack_a(char **av);
 int is_sorted(Node *a);
 int check_first_largest_second_smallest(Node *a);
 void rotate_and_swap(Node **a);
-void if_dublicate(Node *a);
+void is_dublicate(Node *a);
 void bubble_sort(Node **a);
 Node* copy_stack(Node* a);
 void assign_indix(Node* a);
 void free_stack(Node* a);
 void indexify(Node **a);
-int	ft_stack_size(Node *head);
-void	ft_radix_sort(Node **stack_a, Node **stack_b);
+int	stack_size(Node *head);
+void ft_radix_sort(Node **stack_a, Node **stack_b);
 
 void swap_a(Node **a)
 {
-	Node *tmp;
-	Node *tmp2;
-	Node *tmp3;
+    if (*a == NULL || (*a)->next == NULL) 
+        return;
+    Node *first = *a;
+    Node *second = first->next;
 
-	if (!(*a) || !(*a)->next)               
-		return;
-	tmp = *a;
-	tmp2 = tmp->next;
-	tmp3 = tmp2->next;
-	*a = tmp2;
-	tmp2->next = tmp;
-	tmp->next = tmp3;
-	write(1,"sa\n",3);
+    first->next = second->next;
+    second->next = first;
+    *a = second;
+
+    write(1, "sa\n", 3);
 }
 void rotate_a(Node **a)
 {
-	Node *tmp;
-	Node *tmp2;
+    if (*a == NULL || (*a)->next == NULL) 
+        return;
 
-	if (!(*a) || !(*a)->next)
-		return;
-	tmp = *a;
-	tmp2 = tmp->next;
-	while (tmp2->next)
-		tmp2 = tmp2->next;
-	tmp2->next = *a;
-	*a = tmp->next;
-	tmp->next = NULL;
-	write(1,"ra\n",3);
+    Node *first = *a;
+    *a = first->next;
+    first->next = NULL;
+
+    Node *last = *a;
+    while (last && last->next)
+        last = last->next;
+
+    last->next = first;
+
+    write(1, "ra\n", 3);
 }
 void push_a(Node **a, Node **b)
 {
-	Node *tmp;
+    if (*b == NULL) 
+        return;
 
-	if (!(*b))
-		return;
-	tmp = *b;
-	*b = (*b)->next;
-	tmp->next = *a;
-	*a = tmp;
-	write(1,"pa\n",3);
+    Node *nextNode = (*b)->next;
+    (*b)->next = *a;
+    *a = *b;
+    *b = nextNode;
+
+    write(1, "pa\n", 3);
 }
 void push_b(Node **a, Node **b)
 {
-	Node *tmp;
+    if (!(*a))
+        return;
 
-	if (!(*a))
-		return;
-	tmp = *a;
-	*a = (*a)->next;
-	tmp->next = *b;
-	*b = tmp;
-	write(1,"pb\n",3);
+    Node *nextNode = (*a)->next;
+    (*a)->next = *b;
+    *b = *a;
+    *a = nextNode;
+
+    write(1, "pb\n", 3);
 }
 void printNode(Node *a)
 {
-	while (a)
-	{
-		printf("%d ", a->number);
-		a = a->next;
-	}
-	write(1,"\n",1);
+    if (a == NULL) 
+    {
+        write(1,"\n",1);
+        return;
+    }
+    printf("%d ", a->number);
+    printNode(a->next);
 }
 Node *create_stack_a(char **av)
 {
@@ -134,83 +133,102 @@ Node *create_stack_a(char **av)
 }
 int is_sorted(Node *a)
 {
-	while (a && a->next) 
-	{
-		if (a->number > a->next->number)
-			return 0;
-		a = a->next;
-	}
-	return 1;
+    if (a == NULL || a->next == NULL)
+        return 1;
+    if (a->number > a->next->number)
+        return 0;
+    return is_sorted(a->next);
 }
 int check_first_largest_second_smallest(Node *a)
 {
-	if (a == NULL || a->next == NULL)
-		return 1; 
-	int first = a->number;
-	int second = a->next->number;
-	int largest = first;
-	int smallest = second;
-
-	Node *current = a->next->next;
-	while (current != NULL) 
-	{
-	if (	current->number > largest || current->number < smallest) 
-			return 1; 
-		current = current->next;
-	}
-	return 0; 
+    if (a == NULL || a->next == NULL)
+        return 1; 
+    int largest = a->number;
+    int smallest = a->next->number;
+    a = a->next->next;
+    while (a != NULL) 
+    {
+        if (a->number > largest || a->number < smallest) 
+            return 1; 
+        a = a->next;
+    }
+    return 0; 
 }
 void rotate_and_swap(Node **a)
 {
-	if(*a == NULL || (*a)->next == NULL)
-		return;
-	while(is_sorted(*a) == 0) 
-	{
-		if(check_first_largest_second_smallest(*a) == 0)
-			rotate_a(a);
-		else if((*a)->number > (*a)->next->number) 
-			swap_a(a);
-		else 
-			rotate_a(a);
-	}
+    if(*a == NULL || (*a)->next == NULL)
+        return;
+    int sorted = is_sorted(*a);
+    while(sorted == 0) 
+    {
+        if(check_first_largest_second_smallest(*a) == 0)
+            rotate_a(a);
+        else if((*a)->number > (*a)->next->number) 
+            swap_a(a);
+        else 
+            rotate_a(a);
+
+        sorted = is_sorted(*a);
+    }
 }
-void if_dublicate(Node *a)
+void check_dublicates_recursive(Node *current, Node *check)
 {
-	Node *current = a;
-	while (current != NULL) 
-	{
-		Node *tmp = current->next;
-		while (tmp != NULL) 
-		{
-			if (current->number == tmp->number) 
-			{
-				write(1,"Error\n",6);
-				exit(1);
-			}
-			tmp = tmp->next;
-		}
-		current = current->next;
-	}
+    if (check == NULL)
+        return;
+    if (current->number == check->number)
+    {
+        write(1, "Error\n", 6);
+        exit(1);
+    }
+    check_dublicates_recursive(current, check->next);
 }
-void bubble_sort(Node **a)
+void is_dublicate(Node *a)
 {
-	Node *current = *a;
-	Node *tmp;
-	while (current != NULL) 
-	{
-		tmp = current->next;
-		while (tmp != NULL) 
-		{
-			if (current->number > tmp->number) 
-			{
-				int temp = current->number;
-				current->number = tmp->number;
-				tmp->number = temp;
-			}
-			tmp = tmp->next;
-		}
-		current = current->next;
-	}
+    if (a == NULL)
+        return;
+    check_dublicates_recursive(a, a->next);
+    is_dublicate(a->next);
+}
+void swap_nodes(Node *current, Node *tmp)
+{
+    int temp = current->number;
+    current->number = tmp->number;
+    tmp->number = temp;
+}
+int process_inner_loop(Node *current)
+{
+    Node *tmp = current->next;
+    int swapped = 0;
+
+    while (tmp != NULL)
+    {
+        if (current->number > tmp->number)
+        {
+            swap_nodes(current, tmp);
+            swapped = 1;
+        }
+        tmp = tmp->next;
+    }
+
+    return swapped;
+}
+void bubble_sort(Node **head)
+{
+    if (*head == NULL)
+        return;
+
+    Node *current = *head;
+    int swapped;
+
+    while (current->next != NULL)
+    {
+        swapped = process_inner_loop(current);
+
+        if (swapped == 0)
+            break;
+
+        current = current->next;
+    }
 }
 Node* copy_stack(Node* a)
 {
@@ -277,47 +295,45 @@ void indexify(Node **a)
 
     free_stack(copy);
 }
-int	ft_stack_size(Node *head)
+int stack_size(Node *head)
 {
-	int	stack_size;
-
-	stack_size = 0;
-	while (head)
-	{
-		stack_size++;
-		head = head->next;
-	}
-	return (stack_size);
+    int stack_size = 0;
+    while (head)
+    {
+        stack_size++;
+        head = head->next;
+    }
+    return stack_size;
 }
-void	ft_radix_sort(Node **stack_a, Node **stack_b)
+void process_stack(Node **stack_a, Node **stack_b, int size, int i)
 {
-	int		i;
-	int		j;
-	int		size;
-
-	i = 0;
-	size = ft_stack_size(*stack_a);
-	while (!is_sorted(*stack_a))
-	{
-		j = 0;
-		while (size > j++)
-		{
-			if ((((*stack_a)->number >> i) & 1) == 1)
-				rotate_a(stack_a);
-			else
-				push_b(stack_a, stack_b);
-		}
-		while (ft_stack_size(*stack_b) != 0)
-			push_a(stack_a, stack_b);
-		i++;
-	}
+    int j = 0;
+    while (size > j++)
+    {
+        if ((((*stack_a)->number >> i) & 1) == 1)
+            rotate_a(stack_a);
+        else
+            push_b(stack_a, stack_b);
+    }
+    while (stack_size(*stack_b) != 0)
+        push_a(stack_a, stack_b);
+}
+void ft_radix_sort(Node **stack_a, Node **stack_b)
+{
+    int i = 0;
+    int size = stack_size(*stack_a);
+    while (!is_sorted(*stack_a))
+    {
+        process_stack(stack_a, stack_b, size, i);
+        i++;
+    }
 }
 
 int main(int ac, char **av)
 {
 	Node *a = create_stack_a(av);
 	Node *b = NULL;
-	if_dublicate(a);
+	is_dublicate(a);
 	indexify(&a);
 	// push_b(&a, &b);
 	// push_a(&a, &b);
@@ -325,10 +341,10 @@ int main(int ac, char **av)
 	// printNode(a);
 	// printNode(a);
 	// rotate_a(&a);
-	// if (ft_stack_size(a) <= 10)
-	// 	rate_and_swap(&a);
-	// else
-	// 	ft_radix_sort(&a, &b);
+	if (stack_size(a) <= 10)
+		rotate_and_swap(&a);
+	else
+		ft_radix_sort(&a, &b);
 	// printf("\n.............................\n");
 	// printNode(a);
 	// printf("\n.............................\n");
